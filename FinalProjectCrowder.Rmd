@@ -1,0 +1,253 @@
+---
+title: "Joe Crowder"
+output: html_document
+date: "2024-12-03"
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Cybersecurity breaches within the healthcare industry have become an increasing concern for both organizations and individuals alike. The Department of Health and Human Services (HHS) has been at the forefront of tracking and reporting these breaches, which often involve the unauthorized access, use, or disclosure of sensitive patient information. The rise in reported cybersecurity breaches has drawn attention to the vulnerabilities present in healthcare systems, making it essential for organizations to strengthen their cybersecurity practices. This analysis aims to identify trends and characteristics of cybersecurity breaches reported to the HHS in order to provide organizations with insights into potential risks and areas of improvement for their cybersecurity measures. Using a dataset obtained from publicly available reports from the HHS, we can analyze breach incidents over a period of time, focusing on factors such as breach type, affected entities, number of individuals impacted, and breach resolution time. By examining these aspects in relation to the severity and outcomes of each breach, this analysis aims to highlight key factors that contribute to successful mitigation and those that may increase the risk of breaches occurring.
+
+
+# Data Preparation
+```{r}
+library(tidyverse) # run at the beginning of every session. 
+library(readr)
+library(dplyr)
+library(ggplot2)
+options(scipen=999)
+
+#Cybersecurity breaches reported to the US Department of Health and Human Services
+SecurityBreaches <- read_csv("HHSCyberSecurityBreaches.csv")
+SecurityBreachesCleaned <- read_csv("HHSCyberSecurityBreachesCleaned.csv")
+
+```
+
+
+A glimpse at our dataset
+
+```{r}
+
+glimpse(SecurityBreachesCleaned)
+```
+
+
+Data Manipulation/Cleaning
+
+```{r}
+#An issue I came across when trying to plot the distribution of Breach Types (Type.of.Breach) lead to the data needing to be cleaned in Excel prior to importing
+library(ggplot2)
+breach_counts <- SecurityBreaches %>%
+  count(Type.of.Breach) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+ggplot(breach_counts, aes(x = "", y = percentage, fill = Type.of.Breach)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Distribution of Breach Types",
+       fill = "Breach Type") +
+  theme_void()
+
+```
+
+
+# Exploratory Data Analysis and Visualization
+
+Top 10 Organizations with the most affected individuals?
+
+
+```{r}
+top10_entities <- SecurityBreachesCleaned %>%
+  group_by(Name.of.Covered.Entity) %>%
+  summarise(Total.Affected = sum(Individuals.Affected, na.rm = TRUE)) %>%
+  arrange(desc(Total.Affected)) %>% head(10)
+print(top10_entities)
+```
+
+Number of Data Breaches By Type
+
+```{r}
+NumberofBreaches <- SecurityBreachesCleaned %>%
+  group_by(Type.of.Breach) %>%
+  summarise(Total.Affected = n(), .groups = 'drop') %>% arrange(desc(Total.Affected))
+print(NumberofBreaches)
+```
+Lets see if we can try to clarify what the "Unknown" and "Other" Breaches might be. What might the "Other" data breaches entail?
+
+
+Top 10 most affected "Other" data breaches:
+
+```{r}
+
+top_10_Other_breaches <- SecurityBreachesCleaned %>%
+filter(Type.of.Breach == "Other") %>% group_by(Web.Description) %>% summarise(total_affected = sum(Individuals.Affected, na.rm = TRUE)) %>%
+  arrange(desc(total_affected)) %>%
+  head(10)
+print(top_10_Other_breaches)
+```
+
+
+
+The "Unknown" Breaches
+
+```{r}
+top_10_Unknown_breaches <- SecurityBreachesCleaned %>%
+
+  filter(Type.of.Breach == "Unknown") %>% group_by(Web.Description) %>% summarise(total_affected = sum(Individuals.Affected, na.rm = TRUE)) %>%
+  arrange(desc(total_affected)) %>%
+  head(10)
+print(top_10_Unknown_breaches)
+```
+Seems we only have two descriptions for our Unknown Breaches
+
+Distribution of Data Breach Types?
+
+```{r}
+Date_of_Breach1 <- SecurityBreachesCleaned %>%
+  group_by(Type.of.Breach) %>%
+  summarise(Count = n(), .groups = 'drop')
+ggplot(Date_of_Breach1, aes(x = reorder(Type.of.Breach, -Count), y = Count, fill = Type.of.Breach)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Count of Breaches by Type", x = "Type of Breach", y = "Individuals Affected") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + geom_text(aes(label = Count), vjust = -0.25, size = 3, color = "black")
+
+
+```
+
+
+```{r}
+breach_counts <- SecurityBreachesCleaned %>%
+  count(Type.of.Breach) %>%
+  mutate(percentage = n / sum(n) * 100)
+ggplot(breach_counts, aes(x = "", y = percentage, fill = Type.of.Breach)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Distribution of Breach Types",
+       fill = "Breach Type") +
+  theme_void() 
+```
+
+
+
+
+Top 10 most affected states
+
+```{r}
+top10_states <- SecurityBreachesCleaned %>%
+  group_by(State) %>%
+  summarise(Total.Affected = sum(Individuals.Affected, na.rm = TRUE)) %>%
+  arrange(desc(Total.Affected)) %>%
+  head(10)
+print(top10_states)
+GraphTopStates <- ggplot(top10_states, aes(x = reorder(State, Total.Affected), y = Total.Affected)) +
+  geom_bar(stat = "identity", fill = "salmon") +
+  theme_minimal() +
+  labs(title = "Top 10 States by Individuals Affected", x = "State", y = "Individuals Affected") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1))
+
+```
+
+# Individuals Affected by States
+```{r}
+
+print(GraphTopStates)
+```
+
+
+
+# What is the average number of affected indivduals by breach type
+```{r}
+AverageIndividualAffected <- SecurityBreachesCleaned %>% 
+group_by(Type.of.Breach) %>% 
+summarise(Average.Affected = mean(Individuals.Affected, na.rm = TRUE)) %>% 
+arrange(desc(Average.Affected))
+print(AverageIndividualAffected)
+```
+
+
+
+# Which date had the most individuals affected
+```{r}
+WorstBreachDate <- SecurityBreachesCleaned %>%
+  group_by(Type.of.Breach) %>% slice(which.max(Individuals.Affected)) %>%
+  select(Type.of.Breach, Worst_Date = Breach.Submission.Date, Individuals.Affected, Name.of.Covered.Entity) %>%
+  arrange(desc(Individuals.Affected)) %>% head(15)
+print(WorstBreachDate)
+```
+# Lets take a look at where the data from these breaches originally came from. 
+
+```{r}
+BreachedLocations <- SecurityBreachesCleaned %>%
+  group_by(Location.of.Breached.Information) %>%
+  summarise(Count = n(), .groups = 'drop')
+ggplot(BreachedLocations, aes(x = reorder(Location.of.Breached.Information, -Count), y = Count, fill = Location.of.Breached.Information)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Count), vjust = -0.25, size = 3, color = "black") +
+  labs(title = "Count of Breaches by Location of Breached Information", 
+       x = "Location of Breached Information", y = "Breach Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 55, hjust = 1))  
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+LocationBreaches <- SecurityBreachesCleaned %>%
+  count(Location.of.Breached.Information) %>%
+  mutate(percentage = n / sum(n) * 100)
+ggplot(LocationBreaches, aes(x = "", y = percentage, fill = Location.of.Breached.Information)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Distribution of Breach Types",
+       fill = "Breach Type") +
+  theme_void() 
+
+```
+ 
+
+Graphing with respect to time? 
+
+
+
+```{r}
+
+ggplot(SecurityBreachesCleaned, aes(x = Breach.Submission.Date, y = Individuals.Affected, color = Type.of.Breach, group = Type.of.Breach)) +
+  geom_line() +
+  labs(title = "Breaches Over Time by Type", x = "2010-2014", y = "Individuals Affected") +
+  theme_minimal() +
+  facet_wrap(~Type.of.Breach)
+
+```
+```{r}
+
+
+Theft_breach_data <- SecurityBreachesCleaned %>%
+  filter(Type.of.Breach == "Theft")
+
+# Create the plot for the filtered data
+ggplot(Theft_breach_data, aes(x = Breach.Submission.Date, y = Individuals.Affected, color = Type.of.Breach, group = Type.of.Breach)) +
+  geom_line() +
+  labs(title = "Theft Breaches Over Time",
+       x = "2010-2014",
+       y = "Individuals Affected") +
+  theme_minimal()
+
+```
+
+# Summary
+
+One of the key insights from this analysis is the variance in the number of individuals affected by different breach types. For example, breaches related to Loss often resulted in a higher number of affected individuals compared to other types, such as Unauthorized Access or Hacking Incidences. This suggests that while some breach types may be more common, they may not necessarily have the same widespread impact.
+
+We also found that breaches involving Lost Items are particularly prone to affecting large numbers of individuals. This highlights the need for organizations to implement better access control, and regular security audits to protect sensitive patient information from being leaked.
+
+A notable limitation of this analysis was the lack of detailed information on the effectiveness of specific cybersecurity measures implemented by the organizations. Knowing the resources dedicated to cybersecurity, including investment in training and technology, could provide a clearer picture of how preventative actions might reduce the frequency and severity of breaches.
+
+Ultimately, our findings suggest that while healthcare organizations are increasingly reporting cybersecurity breaches, there are opportunities to reduce their frequency and mitigate their impact. Investing in robust security systems, regular risk assessments, and comprehensive staff training are essential steps toward improving the protection of sensitive healthcare data.
