@@ -482,6 +482,8 @@ print(NumberofBreaches)</code></pre>
 ## 5 Hacking/IT Incident                        94
 ## 6 Improper Disposal                          51
 ## 7 Unknown                                    10</code></pre>
+<p>Occurences of Theft are quite large compared to the runner up.
+However, this may not indicate the number of individuals affected.</p>
 <p>Lets see if we can try to clarify what the “Unknown” and “Other”
 Breaches might be. What might the “Other” data breaches entail?</p>
 <p>Top 10 most affected “Other” data breaches:</p>
@@ -503,6 +505,8 @@ print(top_10_Other_breaches)</code></pre>
 ##  8 &quot;A business associate employee sent an email to multiple pati…            937
 ##  9 &quot;Protected health information was attached to an email addres…            692
 ## 10 &quot;Social security numbers were inadvertently printed on the ad…            560</code></pre>
+<p>Many of these do fall into already established categories but need an
+individual to filter them one by one.</p>
 <p>The “Unknown” Breaches</p>
 <pre class="r"><code>top_10_Unknown_breaches &lt;- SecurityBreachesCleaned %&gt;%
 
@@ -516,7 +520,7 @@ print(top_10_Unknown_breaches)</code></pre>
 ## 1 &quot;\\N&quot;                                                                  1917106
 ## 2 &quot;The IT department turned on the switch to a BA HIE without no…            654
 ## 3 &quot;A newly hired employee impermissibly took patient registratio…            551</code></pre>
-<p>Seems we only have two descriptions for our Unknown Breaches</p>
+<p>Seems we only have two descriptions for our Unknown Breaches.</p>
 <p>Distribution of Data Breach Types?</p>
 <pre class="r"><code>Date_of_Breach1 &lt;- SecurityBreachesCleaned %&gt;%
   group_by(Type.of.Breach) %&gt;%
@@ -586,6 +590,9 @@ print(AverageIndividualAffected)</code></pre>
 ## 5 Unauthorized Access/Disclosure           21819.
 ## 6 Improper Disposal                        15115.
 ## 7 Other                                    14146.</code></pre>
+<p>Despite Theft occuring nearly three times more than the next most
+occuring breach (Unauthorized Access) remains as the 4th breach the
+highest average of individuals affected.</p>
 </div>
 <div id="which-date-had-the-most-individuals-affected" class="section level1">
 <h1>Which date had the most individuals affected</h1>

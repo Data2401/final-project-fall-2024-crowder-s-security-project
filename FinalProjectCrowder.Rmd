@@ -76,6 +76,8 @@ NumberofBreaches <- SecurityBreachesCleaned %>%
   summarise(Total.Affected = n(), .groups = 'drop') %>% arrange(desc(Total.Affected))
 print(NumberofBreaches)
 ```
+Occurences of Theft are quite large compared to the runner up. However, this may not indicate the number of individuals affected.
+
 Lets see if we can try to clarify what the "Unknown" and "Other" Breaches might be. What might the "Other" data breaches entail?
 
 
@@ -89,7 +91,7 @@ filter(Type.of.Breach == "Other") %>% group_by(Web.Description) %>% summarise(to
   head(10)
 print(top_10_Other_breaches)
 ```
-
+Many of these do fall into already established categories but need an individual to filter them one by one.
 
 
 The "Unknown" Breaches
@@ -102,7 +104,7 @@ top_10_Unknown_breaches <- SecurityBreachesCleaned %>%
   head(10)
 print(top_10_Unknown_breaches)
 ```
-Seems we only have two descriptions for our Unknown Breaches
+Seems we only have two descriptions for our Unknown Breaches. 
 
 Distribution of Data Breach Types?
 
@@ -168,7 +170,7 @@ summarise(Average.Affected = mean(Individuals.Affected, na.rm = TRUE)) %>%
 arrange(desc(Average.Affected))
 print(AverageIndividualAffected)
 ```
-
+Despite Theft occuring nearly three times more than the next most occuring breach (Unauthorized Access) remains as the 4th breach the highest average of individuals affected.
 
 
 # Which date had the most individuals affected
@@ -226,6 +228,7 @@ ggplot(SecurityBreachesCleaned, aes(x = Breach.Submission.Date, y = Individuals.
   facet_wrap(~Type.of.Breach)
 
 ```
+
 ```{r}
 
 
